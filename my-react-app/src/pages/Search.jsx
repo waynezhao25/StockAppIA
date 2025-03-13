@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Chart from "../components/Chart";
 
 function Stock() {
@@ -6,6 +6,13 @@ function Stock() {
     const [ticker, setTicker] = useState('');
     const [stockData, setStockData] = useState(null);
     const [interval, setTimeInterval] = useState("1");
+    const [watchlist, setWatchlist] = useState([]);
+
+    useEffect(() => {
+      const savedWatchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+      setWatchlist(savedWatchlist);
+
+  }, []);
     function handleInput(event){
         setTicker(event.target.value.toUpperCase());
     }
@@ -16,6 +23,12 @@ function Stock() {
             if (data && data.c) { // if ticker has a matching data and current price then that stock is set
               setStockData(data);
             }})};
+            const addToWatchlist = () => {
+              if (!ticker) return; // Don't add empty tickers
+              const updatedWatchlist = [...watchlist, ticker.toUpperCase()];
+              setWatchlist(updatedWatchlist);
+              localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
+          };
   return (
     <div>
       <h1>Stock Market Data</h1>
@@ -26,6 +39,7 @@ function Stock() {
         placeholder="Type stock ticker here" 
       />
       <button onClick={fetchStockData}>Fetch Data</button>
+      <button onClick={addToWatchlist}>Add to Watchlist</button>
       {stockData && (
         <div>
           <h2>{ticker} Stock Data</h2>
